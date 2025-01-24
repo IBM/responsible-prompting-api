@@ -26,7 +26,6 @@ __license__ = "Apache 2.0"
 __version__ = "0.0.1"
 
 import os
-import sys
 
 def get_credentials():
     """
@@ -41,23 +40,15 @@ def get_credentials():
         hf_url: HuggingFace url to be used.
 
     Raises:
-        ValueError when hf_token and hf_url 
-        values are missing or incorrect.
+        Nothing.
     """
     # Loading hugging face token from env file
-    default_hf_url = 'https://api-inference.huggingface.co/pipeline/feature-extraction/'
     try:
         hf_token = os.environ.get('HF_TOKEN')
-        if not hf_token or hf_token == '<include-token-here>':
-           raise ValueError
+        if hf_token == "<include-token-here>":
+           print('Please include your HF_TOKEN in the .env file')
     except:
-        print('Please include your HF_TOKEN in the .env file')
-        sys.exit(1) 
-    try:
-        hf_url = os.environ.get('HF_URL')
-        if not hf_url:
-           raise ValueError
-    except:
-        print('Please include your HF_URL in the .env file')
-        return hf_token, default_hf_url
+        ('There was an error when getting the HF_TOKEN')
+    hf_url = os.environ.get('HF_URL')
+
     return hf_token, hf_url
