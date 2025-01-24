@@ -44,10 +44,11 @@ def get_credentials():
     # Loading hugging face token from env file
     try:
         hf_token = os.environ.get('HF_TOKEN')
-        if hf_token == "<include-token-here>":
-           print('Please include your HF_TOKEN in the .env file')
+        print(hf_token)
+        if not hf_token or hf_token == '<include-token-here>':
+           raise ValueError
     except:
-        ('There was an error when getting the HF_TOKEN')
+        print('Please include your HF_TOKEN in the .env file')
     hf_url = os.environ.get('HF_URL')
 
     return hf_token, hf_url
