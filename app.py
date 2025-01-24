@@ -30,7 +30,6 @@ from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api, reqparse
 import control.recommendation_handler as recommendation_handler
 from helpers import get_credentials, authenticate_api, save_model
-#from jsonschema import validate, ValidationError
 
 import config as cfg
 
@@ -43,18 +42,12 @@ app.register_blueprint(cfg.SWAGGER_BLUEPRINT, url_prefix = cfg.SWAGGER_URL)
 def index():
     return "Ready!"
 
-JSON_IS_VALID = True
-
 @app.route("/recommend", methods=['GET'])
 @cross_origin()
 def recommend():
     hf_token, hf_url = get_credentials.get_credentials()
-    print('TOKEN, URL', hf_token, hf_url)
     api_url, headers = authenticate_api.authenticate_api(hf_token, hf_url)
-    print('AQUI', api_url)
     prompt_json = recommendation_handler.populate_json()
-    if JSON_IS_VALID:
-         print("Here")
     args = request.args
     print("args list = ", args)
     prompt = args.get("prompt")
@@ -81,8 +74,6 @@ def get_thresholds():
 def recommend_local():
     model_id, model_path = save_model.save_model()
     prompt_json = recommendation_handler.populate_json()
-    if JSON_IS_VALID:
-         print("Here")
     args = request.args
     print("args list = ", args)
     prompt = args.get("prompt")

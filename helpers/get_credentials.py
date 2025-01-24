@@ -31,6 +31,7 @@ import sys
 def get_credentials():
     """
     Function that loads HF credentials from env file.
+    The function exits the app if HF token is missing.
 
     Args:
         None.
