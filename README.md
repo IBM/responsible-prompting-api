@@ -1,6 +1,9 @@
 [![Build Status](https://app.travis-ci.com/IBM/responsible-prompting-api.svg?token=3QHapyMs1C2MgHcEzaRi&branch=main)](https://app.travis-ci.com/IBM/responsible-prompting-api)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+#### This version is expanded to incorporate sentences from the AdvBench dataset
+If you want to know more about the **AdvBench**, please access their github repo [LLM Attacks](https://github.com/llm-attacks/llm-attacks/tree/main).
+
 # Responsible prompting API
 Responsible Prompting is an LLM-agnostic lightweight prompt recommender system that aims at dynamically supporting users in crafting prompts that embed social values and avoid harmful prompts.
 
