@@ -29,12 +29,8 @@ from flask import Flask, request, render_template
 from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api, reqparse
 import control.recommendation_handler as recommendation_handler
-<<<<<<< HEAD
 from helpers import get_credentials, authenticate_api, save_model
-
-=======
 from helpers import get_credentials, authenticate_api, save_model, validate_json
->>>>>>> 8aa9162 (displaying error when json cant be loaded)
 import config as cfg
 
 app = Flask(__name__, template_folder='templates')
