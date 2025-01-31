@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/invalid_json.css')}}">
+</head>
+<body>
+
+<h1>Error when loading sentences json file</h1>
+<p>The API can't return a response due to an invalid sentences json file. Please revise the json file being loaded.</p>
+<p><b>Check the error description below:</b></p>
+<p><mark>{{ error_message }}</mark></p>
+</body>
+</html>

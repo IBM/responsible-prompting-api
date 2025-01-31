@@ -25,15 +25,19 @@ __credits__ = ["Vagner Santana, Melina Alberio, Cassia Sanctos, Tiago Machado"]
 __license__ = "Apache 2.0"
 __version__ = "0.0.1"
 
-from flask import Flask, jsonify, request
+from flask import Flask, request, render_template
 from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api, reqparse
 import control.recommendation_handler as recommendation_handler
+<<<<<<< HEAD
 from helpers import get_credentials, authenticate_api, save_model
 
+=======
+from helpers import get_credentials, authenticate_api, save_model, validate_json
+>>>>>>> 8aa9162 (displaying error when json cant be loaded)
 import config as cfg
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 # swagger configs
 app.register_blueprint(cfg.SWAGGER_BLUEPRINT, url_prefix = cfg.SWAGGER_URL)
@@ -47,13 +51,17 @@ def index():
 def recommend():
     hf_token, hf_url = get_credentials.get_credentials()
     api_url, headers = authenticate_api.authenticate_api(hf_token, hf_url)
-    prompt_json = recommendation_handler.populate_json()
-    args = request.args
-    print("args list = ", args)
-    prompt = args.get("prompt")
-    recommendation_json = recommendation_handler.recommend_prompt(prompt, prompt_json, 
-                                                                  api_url, headers)
-    return recommendation_json
+    prompt_json, json_error = recommendation_handler.populate_json()
+    if json_error is None:
+        args = request.args
+        print("args list = ", args)
+        prompt = args.get("prompt")
+        recommendation_json = recommendation_handler.recommend_prompt(prompt, prompt_json, 
+                                                                        api_url, headers)
+        return recommendation_json
+    else:
+        return render_template('invalid_json.html', error_message=json_error)
+    
 
 @app.route("/get_thresholds", methods=['GET'])
 @cross_origin()
