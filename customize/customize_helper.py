@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Copyright 2021, IBM Corporation. 
+# Copyright 2021, IBM Corporation.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,10 +45,10 @@ def query_model(texts, model_path):
 
 # Returns euclidean distance between two embeddings
 def get_distance(embedding1, embedding2):
-    total = 0    
+    total = 0
     if( len(embedding1) != len(embedding2)):
         return math.inf
-    
+
     for i, obj in enumerate(embedding1):
         total += math.pow(embedding2[0][i] - embedding1[0][i], 2)
     return(math.sqrt(total))
@@ -56,7 +56,7 @@ def get_distance(embedding1, embedding2):
 # Returns the centroid for a given value
 def get_centroid(v, dimension = 384, k = 10):
     centroid = [0] * dimension
-    count = 0            
+    count = 0
     for p in v['prompts']:
         i = 0
         while i < len(p['embedding']):
@@ -72,27 +72,21 @@ def get_centroid(v, dimension = 384, k = 10):
     if(len(v['prompts']) <= k):
         return centroid
     else:
-        k_items = []
-        k_prompts = []
+        k_items = pd.DataFrame(columns=['embedding', 'distance'])
         for p in v['prompts']:
-            dist = get_distance(pd.DataFrame(centroid ), pd.DataFrame(p['embedding'])) 
-            if(len(k_items) < k):
-                k_items.append(p['embedding'])
-                k_prompts.append(p['text'])
-            else:
-                i = 0
-                while(i < len(k_items)):
-                    if( dist < get_distance( pd.DataFrame(centroid), pd.DataFrame(k_items[i]))):
-                        k_items[i] = p['embedding']
-                        k_prompts[i] = p['text']
-                        break
-                    i += 1
+            dist = get_distance(pd.DataFrame(centroid), pd.DataFrame(p['embedding']))
+            k_items = pd.concat([pd.DataFrame([[p['embedding'], dist]], columns=k_items.columns), k_items], ignore_index=True)
+
+        k_items = k_items.sort_values(by='distance')
+        k_items = k_items.head(k)
 
         # Computing centroid only for the k-near elements
-        for i, embedding  in enumerate(k_items):
-            for j, dimension in enumerate(k_items[i]):
-                centroid[j] += k_items[i][j]
-        while i < len( centroid ):
+        centroid = [0] * dimension
+        for i, embedding in enumerate(k_items['embedding']):
+            for j, dimension in enumerate(embedding):
+                centroid[j] += embedding[j]
+        i = 0
+        while i < len(centroid):
             centroid[i] /= k
             i += 1
     return centroid
@@ -106,10 +100,10 @@ def populate_embeddings(prompt_json, model_path):
                     if( 'error' in embedding ):
                         p['embedding'] = []
                         errors += 1
-                    else: 
+                    else:
                         p['embedding'] = embedding.tolist()
                         #successes += 1
-                        
+
     for v in prompt_json['negative_values']:
         for p in v['prompts']:
             if(p['text'] != '' and p['embedding'] == []):
@@ -117,7 +111,7 @@ def populate_embeddings(prompt_json, model_path):
                 if('error' in embedding):
                     p['embedding'] = []
                     errors += 1
-                else: 
+                else:
                     p['embedding'] = embedding.tolist()
                     #successes += 1
     return prompt_json

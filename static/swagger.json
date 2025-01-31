@@ -55,7 +55,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "0.3"
+            "example": "0.1"
           },
           {
             "name": "remove_upper_threshold",
@@ -172,7 +172,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "0.3"
+            "example": "0.1"
           },
           {
             "name": "remove_upper_threshold",
