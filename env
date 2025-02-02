@@ -1,6 +1,0 @@
-HF_TOKEN=<include-token-here>
-HF_URL=https://api-inference.huggingface.co/pipeline/feature-extraction/
-WATSONX_APIKEY = "L8N76Djnx42oWkXXAoaS_fPsoPeGc6Lh6V9-6LdKZPTt"
-WATSONX_URL = "https://us-south.ml.cloud.ibm.com"
-WATSONX_INSTANCE_ID = "ae3d7cc0-672a-40e0-be25-69eca66b5fbc"
-RITS_API_KEY="0ca15d1d6ffb00adfcc0a574f45924af"
