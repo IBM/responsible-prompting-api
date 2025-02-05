@@ -25,26 +25,43 @@ __credits__ = ["Vagner Santana, Melina Alberio, Cassia Sanctos, Tiago Machado"]
 __license__ = "Apache 2.0"
 __version__ = "0.0.1"
 
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api, reqparse
 import control.recommendation_handler as recommendation_handler
 from helpers import get_credentials, authenticate_api, save_model
-
 import config as cfg
+import logging
+import uuid
 
 app = Flask(__name__)
+
+# configure logging
+logging.basicConfig(
+    filename='app.log',  # Log file name
+    level=logging.INFO,  # Log level (INFO, DEBUG, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(levelname)s - %(message)s'  # Log message format
+)
+
+# access the app's logger
+logger = app.logger
+# create user id
+id = str(uuid.uuid4())
 
 # swagger configs
 app.register_blueprint(cfg.SWAGGER_BLUEPRINT, url_prefix = cfg.SWAGGER_URL)
 
+
 @app.route("/")
 def index():
+    user_ip = request.remote_addr
+    logger.info(f'USER {user_ip} - ID {id} - started the app')
     return "Ready!"
 
 @app.route("/recommend", methods=['GET'])
 @cross_origin()
 def recommend():
+    user_ip = request.remote_addr
     hf_token, hf_url = get_credentials.get_credentials()
     api_url, headers = authenticate_api.authenticate_api(hf_token, hf_url)
     prompt_json = recommendation_handler.populate_json()
@@ -53,6 +70,8 @@ def recommend():
     prompt = args.get("prompt")
     recommendation_json = recommendation_handler.recommend_prompt(prompt, prompt_json, 
                                                                   api_url, headers)
+    logger.info(f'USER - {user_ip} - ID {id} - accessed recommend route')
+    logger.info(f'RECOMMEND ROUTE - request: {prompt} response: {recommendation_json}')
     return recommendation_json
 
 @app.route("/get_thresholds", methods=['GET'])
@@ -82,4 +101,4 @@ def recommend_local():
     return local_recommendation_json
 
 if __name__=='__main__':
-	app.run(host='0.0.0.0', port='8080', debug=True)
+    app.run(host='0.0.0.0', port='8080', debug=True)
