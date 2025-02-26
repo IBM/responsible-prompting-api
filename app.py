@@ -25,7 +25,7 @@ __credits__ = ["Vagner Santana, Melina Alberio, Cassia Sanctos, Tiago Machado"]
 __license__ = "Apache 2.0"
 __version__ = "0.0.1"
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api, reqparse
 import control.recommendation_handler as recommendation_handler
@@ -33,6 +33,7 @@ from helpers import get_credentials, authenticate_api, save_model
 import config as cfg
 import logging
 import uuid
+import json
 
 app = Flask(__name__)
 
@@ -50,7 +51,7 @@ id = str(uuid.uuid4())
 
 # swagger configs
 app.register_blueprint(cfg.SWAGGER_BLUEPRINT, url_prefix = cfg.SWAGGER_URL)
-
+FRONT_LOG_FILE = 'front_log.json'
 
 @app.route("/")
 def index():
@@ -66,7 +67,7 @@ def recommend():
     api_url, headers = authenticate_api.authenticate_api(hf_token, hf_url)
     prompt_json = recommendation_handler.populate_json()
     args = request.args
-    print("args list = ", args)
+    #print("args list = ", args)
     prompt = args.get("prompt")
     recommendation_json = recommendation_handler.recommend_prompt(prompt, prompt_json, 
                                                                   api_url, headers)
@@ -82,7 +83,7 @@ def get_thresholds():
     prompt_json = recommendation_handler.populate_json()
     model_id = 'sentence-transformers/all-minilm-l6-v2'
     args = request.args
-    print("args list = ", args)
+    #print("args list = ", args)
     prompt = args.get("prompt")
     thresholds_json = recommendation_handler.get_thresholds(prompt, prompt_json, api_url, 
                                                             headers, model_id)
@@ -99,6 +100,25 @@ def recommend_local():
     local_recommendation_json = recommendation_handler.recommend_local(prompt, prompt_json,
                                                                        model_id, model_path)
     return local_recommendation_json
+
+@app.route("/log", methods=['POST'])
+@cross_origin()
+def log():
+    f_path = 'static/demo/log/'
+    new_data = request.get_json()
+
+    try:
+        with open(f_path+FRONT_LOG_FILE, 'r') as f:
+            existing_data = json.load(f)
+    except FileNotFoundError:
+        existing_data = []
+
+    existing_data.update(new_data)
+    
+    #log_data = request.json
+    with open(f_path+FRONT_LOG_FILE, 'w') as f:
+        json.dump(existing_data, f)
+    return jsonify({'message': 'Data added successfully', 'data': existing_data}), 201
 
 if __name__=='__main__':
     app.run(host='0.0.0.0', port='8080', debug=True)
