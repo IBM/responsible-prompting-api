@@ -38,7 +38,6 @@ import os
 import os.path
 from sentence_transformers import SentenceTransformer
 
-
 def populate_json(json_file_path = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json',
                     existing_json_populated_file_path = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json'):
     """
@@ -56,14 +55,20 @@ def populate_json(json_file_path = './prompt-sentences-main/prompt_sentences-all
         A json.
 
     Raises:
-        Nothing.
+        Exception when json file can't be loaded.
     """
     json_file = json_file_path
     if(os.path.isfile(existing_json_populated_file_path)):
         json_file = existing_json_populated_file_path
-    prompt_json = json.load(open(json_file))
-    return prompt_json
-
+    try:
+        prompt_json = json.load(open(json_file))
+        json_error = None
+        return prompt_json, json_error
+    except Exception as e:
+        json_error = e
+        print(f'Error when loading sentences json file: {json_error}')
+        prompt_json = None
+        return prompt_json, json_error 
 
 def query(texts, api_url, headers):
     """
