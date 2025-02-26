@@ -25,6 +25,7 @@ __credits__ = ["Vagner Santana, Melina Alberio, Cassia Sanctos, Tiago Machado"]
 __license__ = "Apache 2.0"
 __version__ = "0.0.1"
 
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api, reqparse
@@ -32,8 +33,8 @@ import control.recommendation_handler as recommendation_handler
 from helpers import get_credentials, authenticate_api, save_model
 import config as cfg
 import logging
-import uuid
 import json
+
 
 app = Flask(__name__)
 
@@ -53,6 +54,7 @@ id = str(uuid.uuid4())
 app.register_blueprint(cfg.SWAGGER_BLUEPRINT, url_prefix = cfg.SWAGGER_URL)
 FRONT_LOG_FILE = 'front_log.json'
 
+
 @app.route("/")
 def index():
     user_ip = request.remote_addr
@@ -67,7 +69,6 @@ def recommend():
     api_url, headers = authenticate_api.authenticate_api(hf_token, hf_url)
     prompt_json = recommendation_handler.populate_json()
     args = request.args
-    #print("args list = ", args)
     prompt = args.get("prompt")
     recommendation_json = recommendation_handler.recommend_prompt(prompt, prompt_json, 
                                                                   api_url, headers)

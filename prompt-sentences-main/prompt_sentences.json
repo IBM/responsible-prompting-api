@@ -670,13 +670,6 @@
             "centroid": []
         },
         {
-            "label": "personal",
-            "prompts": [
-                { "text": "", "ref": 3, "embedding": [] }
-            ],
-            "centroid": []
-        },
-        {
             "label": "positivity",
             "prompts": [
                 { "text": "Focus on the positive aspects of the prompt in your response.", "ref": 6, "embedding": [] },

@@ -2,9 +2,9 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Responsible prompting API
-Responsible Prompting is an LLM-agnostic lightweight prompt recommender system that aims at dynamically supporting users in crafting prompts that embed social values and avoid harmful prompts.
+Responsible Prompting is an [AI Alliance affiliated project](https://thealliance.ai/affiliated-projects/responsible-prompting) providing an LLM-agnostic lightweight prompt recommender that dynamically supports users in crafting prompts that embed social values and avoid harmful prompts.
 
-This API is composed of a `Flask server` that hosts the `recommend`, `recommend_local`, `get_thresholds` routes, the `swagger` files and a responsible prompting `demo`.
+This Responsible Prompting API is composed of a `Flask server` that hosts the `recommend`, `recommend_local`, `get_thresholds` routes, the `swagger` files and a responsible prompting `demo`.
 You can run the server locally to execute requests and obtain responsible prompting recommendations according to `swagger` description.
 
 1. [Getting started](#getting-started)
@@ -14,6 +14,7 @@ You can run the server locally to execute requests and obtain responsible prompt
 5. [Contribute](#contribute)
 6. [License](#license)
 7. [Contributors](#contributors)
+8. [Citing the project](#citing-the-project)
 
 ## Getting started
 First, make sure you have:
@@ -437,3 +438,22 @@ This project is licensed under the [Apache License 2.0](LICENSE).
 [<img src="https://github.com/tiago-git-area.png" width="60px;"/>](https://github.com/tiago-git-area/)
 [<img src="https://github.com/Heloisa-Candello.png" width="60px;"/>](https://github.com/Heloisa-Candello/)
 [<img src="https://github.com/seb-brAInethics.png" width="60px;"/>](https://github.com/seb-brAInethics/)
+
+## Citing the project
+
+Please cite the project as:
+
+```bibtex
+@inproceedings{santana2025responsible,
+  author    = {Vagner Figueredo de Santana and Sara Berger and Heloisa Candello and Tiago Machado and Cassia Sampaio Sanctos and Tianyu Su and Lemara Williams},
+  title     = {Responsible Prompting Recommendation: Fostering Responsible {AI} Practices in Prompting-Time},
+  booktitle = {CHI Conference on Human Factors in Computing Systems ({CHI} '25)},
+  year      = {2025},
+  location  = {Yokohama, Japan},
+  publisher = {ACM},
+  address   = {New York, NY, USA},
+  pages     = {30},
+  doi       = {10.1145/3706598.3713365},
+  url       = {https://doi.org/10.1145/3706598.3713365}
+}
+```
