@@ -9,7 +9,7 @@ cffi==1.17.1
 charset-normalizer==3.3.2
 click==8.1.7
 contourpy==1.2.1
-cryptography==43.0.1
+cryptography==44.0.1
 cycler==0.12.1
 Deprecated==1.2.14
 dparse==0.6.4b0
