@@ -16,7 +16,7 @@ dparse==0.6.4b0
 exceptiongroup==1.2.1
 filelock==3.12.4
 Flask==3.0.3
-Flask-Cors==4.0.1
+Flask-Cors==4.0.2
 Flask-RESTful==0.3.10
 flask-swagger-ui==4.11.1
 fonttools==4.53.1
