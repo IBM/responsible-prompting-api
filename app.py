@@ -35,7 +35,7 @@ import config as cfg
 import logging
 import uuid
 import json
-
+import os
 
 app = Flask(__name__)
 
@@ -123,4 +123,5 @@ def log():
     return jsonify({'message': 'Data added successfully', 'data': existing_data}), 201
 
 if __name__=='__main__':
-    app.run(host='0.0.0.0', port='8080', debug=True)
+    debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() in ['true', '1', 't']
+    app.run(host='0.0.0.0', port='8080', debug=debug_mode)
