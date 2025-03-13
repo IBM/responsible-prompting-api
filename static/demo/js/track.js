@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const userId = "id" + Math.random().toString(16).slice(2);
+    const array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+    const userId = "id" + array[0].toString(16);
     const textarea = document.getElementById('prompt');
     const recom = document.getElementById('recommendation');
     
