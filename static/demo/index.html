@@ -89,12 +89,12 @@
             }
             svg.selectAll("*").remove(); // Clearing previous plots
             var graphData = {nodes: [], edges: []}
-            var i = j = k = 0;
+            var i = j = 0;
             if( recommendations['input'].length > 0 ){
                 graphData.nodes.push({
                     id: 0,
-                    x: recommendations['input'][0].x,
-                    y: recommendations['input'][0].y,
+                    x: Number(recommendations['input'][0].x),
+                    y: Number(recommendations['input'][0].y),
                     text: recommendations['input'][0].sentence,
                     label: 'S' + (i+1),
                     type: 'input'
@@ -102,8 +102,8 @@
                 for( i = 1; i < recommendations['input'].length; i++ ){
                     graphData.nodes.push({
                         id: i,
-                        x: recommendations['input'][i].x,
-                        y: recommendations['input'][i].y,
+                        x: Number(recommendations['input'][i].x),
+                        y: Number(recommendations['input'][i].y),
                         text: recommendations['input'][i].sentence,
                         label: 'S' + (i+1),
                         type: 'input'
@@ -117,8 +117,8 @@
                 for( j = 0; j < recommendations['add'].length; j++ ){
                     graphData.nodes.push({
                         id: i + j + 1,
-                        x: recommendations['add'][j].x,
-                        y: recommendations['add'][j].y,
+                        x: Number(recommendations['add'][j].x),
+                        y: Number(recommendations['add'][j].y),
                         text: recommendations['add'][j].prompt,
                         label: recommendations['add'][j].value,
                         type: 'add'
@@ -130,16 +130,15 @@
 
             // Adding nodes & edges for removal recommendations
             if( recommendations['remove'].length > 0 ){
-                for( var k = 0; k < 1; k++ ){ // Showing only the first removal recommendation
-                    graphData.nodes.push({
-                        id: i + j + k + 1,
-                        x: recommendations['remove'][k].x,
-                        y: recommendations['remove'][k].y,
-                        text: recommendations['remove'][k].closest_harmful_sentence,
-                        label: recommendations['remove'][k].value,
-                        type: 'remove'
-                    });
-                }
+                // Showing only the first removal recommendation
+                graphData.nodes.push({
+                    id: i + j,
+                    x: Number(recommendations['remove'][0].x),
+                    y: Number(recommendations['remove'][0].y),
+                    text: recommendations['remove'][0].closest_harmful_sentence,
+                    label: recommendations['remove'][0].value,
+                    type: 'remove'
+                });
             }
 
             // Convert edge references to actual node objects
@@ -150,13 +149,19 @@
 
             const { nodes, edges } = graphData;
 
+            // Prepare the ranges of values for the axes
+            const xDomain = d3.extent(nodes, d => d.x);
+            const yDomain = d3.extent(nodes, d => d.y);
+            const xPadding = 2
+            const yPadding = 2
+
             // Prepare the scales for positional encoding.
             const x = d3.scaleLinear()
-                .domain(d3.extent(nodes, d => d.x * 2)).nice()
+                .domain([xDomain[0]-xPadding,xDomain[1]+xPadding]).nice()
                 .range([marginLeft, width - marginRight]);
 
             const y = d3.scaleLinear()
-                .domain(d3.extent(nodes, d => d.y * 2)).nice()
+                .domain([yDomain[0]-yPadding,yDomain[1]+yPadding]).nice()
                 .range([height - marginBottom, marginTop]);
 
             // Create the axes.
