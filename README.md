@@ -57,7 +57,7 @@ headers: {"Authorization": "Bearer <include-token-here>"}
 ```
 
 > [!CAUTION]
-> Your Hugging Face token will be visible in the code, remember to remove the token before committing or after running the prototype to avoid displaying sensitive data. In case the token has been exposed, follow the HF [https://huggingface.co/docs/hub/en/security-tokens](instructions to invalidate it).
+> Your Hugging Face token will be visible in the code, remember to remove the token before committing or after running the prototype to avoid displaying sensitive data. In case the token has been exposed, follow the HF [instructions to invalidate it](https://huggingface.co/docs/hub/en/security-tokens).
 
 5. In your browser, access http://127.0.0.1:8080/static/demo/index.html
 
