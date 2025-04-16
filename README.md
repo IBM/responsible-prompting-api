@@ -48,16 +48,16 @@ HF_TOKEN=<include-token-here>
 $( "#demo" ).on( "submit", function( e ){ // Hugging Face
 ...
 ```
+> [!NOTE]
+> When customizing the `$ajax` call, please make sure that the json data follows the specifications of the LLM being used.
+
 3. Inside this function, replace `<include-token-here>` with your hugging face access token:
 ```
 headers: {"Authorization": "Bearer <include-token-here>"}
 ```
 
 > [!CAUTION]
-> Use your token on client-side files only for demo/prototyping purposes.
-
-> [!CAUTION]
-> When customizing the `$ajax` call, please make sure that the json data follows the specifications of the LLM being used.
+> Your Hugging Face token will be visible in the code, remember to remove the token before committing or after running the prototype to avoid displaying sensitive data. In case the token has been exposed, follow the HF [https://huggingface.co/docs/hub/en/security-tokens](instructions to invalidate it).
 
 5. In your browser, access http://127.0.0.1:8080/static/demo/index.html
 
