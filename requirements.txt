@@ -145,7 +145,7 @@ sympy==1.13.1
 tensorflow==2.16.2
 termcolor==2.5.0
 terminado==0.18.1
-tf_keras==2.16.2
+tf_keras==2.16.0
 threadpoolctl==3.5.0
 tinycss2==1.4.0
 tokenizers>=0.21
