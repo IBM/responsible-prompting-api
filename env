@@ -1,2 +1,2 @@
 HF_TOKEN=<include-token-here>
-HF_URL=https://api-inference.huggingface.co/pipeline/feature-extraction/
+HF_URL=https://api-inference.huggingface.co/models/
