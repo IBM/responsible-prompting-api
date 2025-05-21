@@ -343,7 +343,7 @@
                 { "text": "Make sure the machine learning model can explain in details the result.", "ref": 9, "embedding": [] },
                 { "text": "Please provide examples for each component in a way that I could improve.", "ref": 9, "embedding": [] },
                 { "text": "Please ensure it is modular, with each function pertaining to a specific method to ensure that users can clearly understand the inputs and outputs of each function", "ref": 9, "embedding": [] },
-                { "text": "Provide details on how your are computing the score(s) and make sure you consider other key variable(s).", "ref": 9, "embedding": [] },
+                { "text": "Provide details on how you are computing the score(s) and make sure you consider other key variable(s).", "ref": 9, "embedding": [] },
                 { "text": "Consider adding contextual information and examples of what constitutes implicit and explicit hate.", "ref": 9, "embedding": [] },
                 { "text": "Display a list of most popular machine learning models combined with different explainability techniques and what are the advantages and disadvantages of using them.", "ref": 9, "embedding": [] },
                 { "text": "In addition to classification of urgency, provide suggestions for timelines that might be appropriate to best address these issues according to their class.", "ref": 9, "embedding": [] },
