@@ -32,6 +32,7 @@ from flask_restful import Resource, Api, reqparse
 import control.recommendation_handler as recommendation_handler
 from helpers import get_credentials, authenticate_api, save_model
 import config as cfg
+import requests
 import logging
 import uuid
 import json
@@ -121,6 +122,55 @@ def log():
     with open(f_path+FRONT_LOG_FILE, 'w') as f:
         json.dump(existing_data, f)
     return jsonify({'message': 'Data added successfully', 'data': existing_data}), 201
+
+@app.route("/demo_inference", methods=['GET'])
+@cross_origin()
+def demo_inference():
+    args = request.args
+
+    model_id = args.get('model_id', default="meta-llama/Llama-4-Scout-17B-16E-Instruct")
+    temperature = args.get('temperature', default=0.5)
+    max_new_tokens = args.get('max_new_tokens', default=1000)
+
+    hf_token, _ = get_credentials.get_credentials()
+
+    prompt = args.get('prompt')
+
+    API_URL = "https://router.huggingface.co/together/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {hf_token}",
+    }
+
+    response = requests.post(
+        API_URL,
+        headers=headers, 
+        json={
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": prompt
+                        },
+                    ]
+                }
+            ],
+            "model": model_id,
+            'temperature': temperature,
+            'max_new_tokens': max_new_tokens,
+        }
+    )
+    try:
+        response = response.json()["choices"][0]["message"]
+        response.update({
+            'model_id': model_id,
+            'temperature': temperature,
+            'max_new_tokens': max_new_tokens,
+        })
+        return response
+    except:
+        return response.text, response.status_code
 
 if __name__=='__main__':
     debug_mode = os.getenv('FLASK_DEBUG', 'False').lower() in ['true', '1', 't']

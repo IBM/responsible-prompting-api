@@ -390,22 +390,6 @@
 
         // Generation request
         $( "#demo" ).on( "submit", function(e){ // Hugging Face
-
-            var out = "" ;
-            const ajax_headers = {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Access-Control-Allow-Headers': '*',
-                'Authorization' : 'Bearer <include-token-here>',
-            };
-            $.ajaxSetup({
-                headers: ajax_headers
-            });
-
-            if( ajax_headers['Authorization'] == "Bearer <include-token-here>" ){
-                console.error( "Please inform your authorization token in the ajax header setup." ) ;
-            }
-            else{
                 $( "#generate" ).toggleClass( "bx--btn--disabled" ) ;
                 ( function loading_animation(){
                     if( $( "#outcome" ).attr( "placeholder" ) == "" ){
@@ -420,20 +404,9 @@
                     setTimeout( loading_animation, 500 );
                 } )()
 
-                var temperature = 0.5 ;
-                var max_new_tokens = 1000 ;
-                var model_id = "meta-llama/Llama-3.2-11B-Vision-Instruct"
                 $.ajax({
-                    type: "POST",
-                    url: "https://api-inference.huggingface.co/models/" + model_id,
-                    data: JSON.stringify({
-                                    "inputs":  $("#prompt").val(),
-                                    "parameters": {
-                                        "temperature": temperature,
-                                        "max_new_tokens": max_new_tokens
-                                    }
-                                }),
-                    crossDomain: true,
+                    url: encodeURI("/demo_inference?prompt=" + $("#prompt").val()),
+                    dataType: 'json',
                     success: function(data){
                         // Resetting the status of the button
                         $( "#generate" ).toggleClass( "bx--btn--disabled" ) ;
@@ -444,7 +417,10 @@
                             $( "#demo" ).data( "timeoutId", "" ) ;
                         }
 
-                        out = data[0].generated_text.split("");
+                        out = data.content.split("");
+                        model_id = data.model_id;
+                        temperature = data.temperature
+                        max_new_tokens = data.max_new_tokens
 
                         $( "#outcome" ).append( "\n\n+ ------------------------------------\n| Model: " + model_id + "\n| Temperature: " + temperature + "\n| Max new tokens: " + max_new_tokens + "\n+ ------------------------------------\n\n" ) ;
                         // Animating the generated output
@@ -456,9 +432,12 @@
                                 $( "#demo" ).data( "timeoutId", timeoutId ) ;
                             }
                         } )()
+                    },
+                    error: function(data) {
+                        out = data.responseJSON.error.message
+                        $( "#outcome" ).val(out);
                     }
-                });
-            }
+                })
             // Returning false so the form keeps user in the same page
             return false;
         });
