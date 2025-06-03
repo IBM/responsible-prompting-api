@@ -5,9 +5,6 @@
 ## Prompt sentences by values for all-minilm-l6-v2
 ![Prompt sentences by values](sentences_by_values-all-minilm-l6-v2.png)
 
-## Prompt sentences by values for granite-embedding-30m-english
-![Prompt sentences by values](sentences_by_values-granite-embedding-30m-english.png)
-
 ## Prompt sentences by values for bge-large-en-v1.5
 ![Prompt sentences by values](sentences_by_values-bge-large-en-v1.5.png)
 

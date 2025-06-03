@@ -59,7 +59,7 @@
                     </div>
                     <div class="bx--form-item">
                         <label for="outcome" id="outcome-label" class="bx--label">Generated text</label>
-                        <textarea id="outcome" name="outcome" class="bx--text-area" rows="12" placeholder="Generated text"></textarea>
+                        <textarea id="outcome" name="outcome" class="bx--text-area" rows="12" placeholder=""></textarea>
                     </div>
                 </form>
             </div>
@@ -124,7 +124,6 @@
                         type: 'add'
                     });
                     graphData.edges.push({ source: (i-1), target: (i+j+1), type: 'add' });
-                    // console.debug( "adding edge: [" + i + ", " + (i+j+1) + "]" )
                 }
             }
 
@@ -422,49 +421,75 @@
 
         // Generation request
         $( "#demo" ).on( "submit", function(e){ // Hugging Face
+
             var out = "" ;
+            const ajax_headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Access-Control-Allow-Headers': '*',
+                'Authorization' : 'Bearer <include-token-here>',
+            };
             $.ajaxSetup({
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Access-Control-Allow-Headers': '*',
-                    'Authorization' : 'Bearer <include-token-here>',
-                }
+                headers: ajax_headers
             });
 
-            // TODO: Add loading after the request
-            var temperature = 0.5 ;
-            var max_new_tokens = 1000 ;
-            var model_id = "meta-llama/Llama-3.2-11B-Vision-Instruct"
-            $.ajax({
-                type: "POST",
-                url: "https://api-inference.huggingface.co/models/" + model_id,
-                data: JSON.stringify({
-                                "inputs":  $("#prompt").val(),
-                                "parameters": {
-                                    "temperature": temperature,
-                                    "max_new_tokens": max_new_tokens
-                                }
-                            }),
-                crossDomain: true,
-                success: function(data){
-                    out = data[0].generated_text.split("");
-                    //console.log(out);
-                    //out = data.results[0].generated_text.split( "" ) ;
-                    //console.debug(out);
-                    // $( "#outcome" ).val( out ) ;
-                    $( "#outcome" ).append( "\n\n+ ------------------------------------\n| Model: " + model_id + "\n| Temperature: " + temperature + "\n| Max new tokens: " + max_new_tokens + "\n+ ------------------------------------\n\n" ) ;
-                    // Animating the generated output
-                    ( function typing_animation(){
-                        $( "#outcome" ).append( out.shift() ) ;
-                        $( "#outcome" ).scrollTop( $( "#outcome" )[0].scrollHeight ) ;
-                        if( out.length > 0 ) {
-                            setTimeout( typing_animation, 10 );
+            if( ajax_headers['Authorization'] == "Bearer <include-token-here>" ){
+                console.error( "Please inform your authorization token in the ajax header setup." ) ;
+            }
+            else{
+                $( "#generate" ).toggleClass( "bx--btn--disabled" ) ;
+                ( function loading_animation(){
+                    if( $( "#outcome" ).attr( "placeholder" ) == "" ){
+                        $( "#outcome" ).attr( "placeholder", "Requesting content." ) ;
+                    }
+                    else if( $( "#outcome" ).attr( "placeholder" ).length < 21 ){
+                        $( "#outcome" ).attr( "placeholder", $( "#outcome" ).attr( "placeholder") + "." ) ;
+                    }
+                    else{
+                        $( "#outcome" ).attr( "placeholder", "Requesting content." ) ;
+                    }
+                    setTimeout( loading_animation, 500 );
+                } )()
+
+                var temperature = 0.5 ;
+                var max_new_tokens = 1000 ;
+                var model_id = "meta-llama/Llama-3.2-11B-Vision-Instruct"
+                $.ajax({
+                    type: "POST",
+                    url: "https://api-inference.huggingface.co/models/" + model_id,
+                    data: JSON.stringify({
+                                    "inputs":  $("#prompt").val(),
+                                    "parameters": {
+                                        "temperature": temperature,
+                                        "max_new_tokens": max_new_tokens
+                                    }
+                                }),
+                    crossDomain: true,
+                    success: function(data){
+                        // Resetting the status of the button
+                        $( "#generate" ).toggleClass( "bx--btn--disabled" ) ;
+
+                        // Clearing the previous timeout
+                        if( $( "#demo" ).data( "timeoutId" ) != "" ){
+                            clearTimeout( $( "#demo" ).data( "timeoutId" ) );
+                            $( "#demo" ).data( "timeoutId", "" ) ;
                         }
-                    } )()
-                }
-            });
 
+                        out = data[0].generated_text.split("");
+
+                        $( "#outcome" ).append( "\n\n+ ------------------------------------\n| Model: " + model_id + "\n| Temperature: " + temperature + "\n| Max new tokens: " + max_new_tokens + "\n+ ------------------------------------\n\n" ) ;
+                        // Animating the generated output
+                        ( function typing_animation(){
+                            $( "#outcome" ).append( out.shift() ) ;
+                            $( "#outcome" ).scrollTop( $( "#outcome" )[0].scrollHeight ) ;
+                            if( out.length > 0 ) {
+                                const timeoutId = setTimeout( typing_animation, 5 );
+                                $( "#demo" ).data( "timeoutId", timeoutId ) ;
+                            }
+                        } )()
+                    }
+                });
+            }
             // Returning false so the form keeps user in the same page
             return false;
         });

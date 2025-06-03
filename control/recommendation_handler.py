@@ -40,6 +40,7 @@ from sentence_transformers import SentenceTransformer
 from umap import UMAP
 import tensorflow as tf
 from umap.parametric_umap import ParametricUMAP, load_ParametricUMAP
+from sentence_transformers import SentenceTransformer
 
 def populate_json(json_file_path = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json',
                     existing_json_populated_file_path = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json'):
@@ -95,8 +96,13 @@ def query(texts, api_url, headers):
             # warning in case of prompts longer than 256 words
             warnings.warn("Warning: Sentence provided is longer than 256 words. Model all-MiniLM-L6-v2 expects sentences up to 256 words.")
             warnings.warn("Word count:{}".format(n_words))
-    response = requests.post(api_url, headers=headers, json={"inputs": texts, "options":{"wait_for_model":True}})
-    return response.json()
+    if('sentence-transformers/all-MiniLM-L6-v2' in api_url):
+        model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        out = model.encode(texts).tolist()
+    else:
+        response = requests.post(api_url, headers=headers, json={"inputs": texts, "options":{"wait_for_model":True}})
+        out = response.json()
+    return out
 
 def split_into_sentences(prompt):
     """
@@ -202,20 +208,22 @@ def recommend_prompt(prompt, prompt_json, api_url, headers, add_lower_threshold 
     Raises:
         Nothing.
     """
-    if(model_id == 'ibm/granite-embedding-30m-english'):
-        json_file = './prompt-sentences-main/sentences_by_values-granite-embedding-30m-english.json'
-        umap_model = load_ParametricUMAP('./models/umap/ibm-granite/granite-embedding-30m-english/')
-    elif(model_id == 'baai/bge-large-en-v1.5' ):
+    if(model_id == 'baai/bge-large-en-v1.5' ):
         json_file = './prompt-sentences-main/prompt_sentences-bge-large-en-v1.5.json'
-        umap_model = load_ParametricUMAP('./models/umap/BAAI/bge-large-en-v1.5/')
+        umap_folder = './models/umap/BAAI/bge-large-en-v1.5/'
     elif(model_id == 'intfloat/multilingual-e5-large'):
         json_file = './prompt-sentences-main/prompt_sentences-multilingual-e5-large.json'
-        umap_model = load_ParametricUMAP('./models/umap/intfloat/multilingual-e5-large/')
+        umap_folder = './models/umap/intfloat/multilingual-e5-large/'
     else: # fall back to all-minilm as default
         json_file = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json'
-        umap_model = load_ParametricUMAP('./models/umap/sentence-transformers/all-MiniLM-L6-v2/')
+        umap_folder = './models/umap/sentence-transformers/all-MiniLM-L6-v2/'
 
-    prompt_json = json.load(open(json_file))
+    # Loading the encoder and config separately due to a bug
+    encoder = tf.keras.models.load_model( umap_folder )
+    with open( f"{umap_folder}umap_config.json", "r" ) as f:
+        config = json.load( f )
+    umap_model = ParametricUMAP( encoder=encoder, **config )
+    prompt_json = json.load( open( json_file ) )
 
     # Output initialization
     out, out['input'], out['add'], out['remove'] = {}, {}, {}, {}
@@ -342,8 +350,8 @@ def get_thresholds(prompts, prompt_json, api_url, headers, model_id = 'sentence-
     thresholds = {}
     thresholds['add_lower_threshold'] = round(add_similarities_df.describe([.1]).loc['10%', 'similarity'], 1)
     thresholds['add_higher_threshold'] = round(add_similarities_df.describe([.9]).loc['90%', 'similarity'], 1)
-    thresholds['upper_lower_threshold'] = round(remove_similarities_df.describe([.1]).loc['10%', 'similarity'], 1)
-    thresholds['upper_higher_threshold'] = round(remove_similarities_df.describe([.9]).loc['90%', 'similarity'], 1)
+    thresholds['remove_lower_threshold'] = round(remove_similarities_df.describe([.1]).loc['10%', 'similarity'], 1)
+    thresholds['remove_higher_threshold'] = round(remove_similarities_df.describe([.9]).loc['90%', 'similarity'], 1)
 
     return thresholds
 
@@ -366,20 +374,22 @@ def recommend_local(prompt, prompt_json, model_id, model_path = './models/all-Mi
     Raises:
         Nothing.
     """
-    if(model_id == 'ibm/granite-embedding-30m-english'):
-        json_file = './prompt-sentences-main/sentences_by_values-granite-embedding-30m-english.json'
-        umap_model = load_ParametricUMAP('./models/umap/ibm-granite/granite-embedding-30m-english/')
-    elif(model_id == 'baai/bge-large-en-v1.5' ):
+    if(model_id == 'baai/bge-large-en-v1.5' ):
         json_file = './prompt-sentences-main/prompt_sentences-bge-large-en-v1.5.json'
-        umap_model = load_ParametricUMAP('./models/umap/BAAI/bge-large-en-v1.5/')
+        umap_folder = './models/umap/BAAI/bge-large-en-v1.5/'
     elif(model_id == 'intfloat/multilingual-e5-large'):
         json_file = './prompt-sentences-main/prompt_sentences-multilingual-e5-large.json'
-        umap_model = load_ParametricUMAP('./models/umap/intfloat/multilingual-e5-large/')
+        umap_folder = './models/umap/intfloat/multilingual-e5-large/'
     else: # fall back to all-minilm as default
         json_file = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json'
-        umap_model = load_ParametricUMAP('./models/umap/sentence-transformers/all-MiniLM-L6-v2/')
+        umap_folder = './models/umap/sentence-transformers/all-MiniLM-L6-v2/'
 
-    prompt_json = json.load(open(json_file))
+    # Loading the encoder and config separately due to a bug
+    encoder = tf.keras.models.load_model( umap_folder )
+    with open( f"{umap_folder}umap_config.json", "r" ) as f:
+        config = json.load( f )
+    umap_model = ParametricUMAP( encoder=encoder, **config )
+    prompt_json = json.load( open( json_file ) )
 
     # Output initialization
     out, out['input'], out['add'], out['remove'] = {}, {}, {}, {}
