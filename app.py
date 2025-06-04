@@ -111,7 +111,16 @@ def rephrase_local():
     hf_token, _ = get_credentials.get_credentials()
 
     response = raphrase_handler.rephrase_local(recommendation, hf_token)
-    print(response)
+    
+    return response, 200
+
+@app.route("/rephrase_add_local", methods=['POST'])
+@cross_origin()
+def rephrase_add_local():
+    recommendation = request.get_json()
+    hf_token, _ = get_credentials.get_credentials()
+
+    response = raphrase_handler.rephrase_add_local(recommendation, hf_token)
     
     return response, 200
 

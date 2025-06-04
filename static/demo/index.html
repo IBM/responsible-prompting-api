@@ -321,13 +321,12 @@
             }
         }
 
-        function rephrase_recommendation(p){
-            console.log(p);
+        function rephrase_recommendation(sentence, sentence_value){
             var api_url = "/rephrase_local";
             var data = {
-                "sentence": p,
-                "value": "misinformation and deception",
-                "sentence_index": 5
+                "sentence": sentence,
+                "value": sentence_value,
+                "sentence_index": 5 // Update for using the actual sentence index
             };
             
             $.ajax({
@@ -337,11 +336,40 @@
                 data: JSON.stringify(data),
                 success: function(response) {
                     // Handle the success response
-                    console.log("Success:", response);
+                    // console.log("Success:", response);
                     if (response['suggestion']) {
-                        $( "#prompt" ).val( $( "#prompt" ).val().replace(p, response['suggestion'] ) ) ;
+                        $( "#prompt" ).val( $( "#prompt" ).val().replace(sentence, response['suggestion'] ) ) ;
                         $( "#recommendation" ).html( "" ) ;
                         $( "#prompt" ).trigger( "keyup" )
+                    }
+                },
+                error: function(error) {
+                    // Handle the error response
+                    console.error("Error:", error);
+                }
+            });
+        }
+
+        function rephrase_add_recommendation(sentence, sentence_value){
+            var api_url = "/rephrase_add_local";
+            var data = {
+                "prompt": $("#prompt").val().trim(),
+                "sentence": sentence,
+                "value": sentence_value
+            };
+            
+            $.ajax({
+                type: "POST",
+                url: api_url,
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(response) {
+                    // Handle the success response
+                    // console.log("Success:", response);
+                    if (response['suggestion']) {
+                        $("#prompt").val($("#prompt").val() + " " + response['suggestion']) ;
+                        $("#recommendation").html("") ;
+                        $("#prompt").trigger("keyup") ;
                     }
                 },
                 error: function(error) {
@@ -403,6 +431,7 @@
                                     var sentence_entity = data["add"][i].prompt.replaceAll( "'", "&apos;" ) ;
                                     var sentence_value = data["add"][i].value.replaceAll( "'", "\\'" ) ;
                                     $( "#recommendation" ).append( '<div class="bx--tag bx--tag--green" style="cursor: pointer;" onmouseover="preview_add_recommendation(\''+ sentence + '\', \'show\')" onmouseout="preview_add_recommendation(\''+ sentence + '\', \'hide\')" onclick="add_recommendation(\''+ sentence + '\')">+ ' + sentence_value + '</div>' ) ;
+                                    $( "#recommendation" ).append( '<div class="bx--tag bx--tag--gray bx--tag--deletable" style="cursor: pointer;" onclick="rephrase_add_recommendation(\''+ sentence + '\', \''+ sentence_value + '\')">! ' + sentence_value + '</div>' ) ;
                                 }
                             }
                         }

@@ -59,3 +59,35 @@ def rephrase_local(recommendation, hf_token, model_id = "meta-llama/Meta-Llama-3
         'suggestion': clean_response(response)
     }
 
+def rephrase_add_local(recommendation, hf_token, model_id = "meta-llama/Meta-Llama-3-8B-Instruct"):
+    tokenizer = AutoTokenizer.from_pretrained(model_id, use_auth_token = hf_token)
+
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        torch_dtype=torch.bfloat16,
+        use_auth_token = hf_token
+    )
+
+    system_prompt = "You are Llama 3, a helpfull large language model. " + \
+        "Please, understant the context of the prompt and the social values, but do not interpret it. " \
+        "Rewrite the sentence strictly in the following format between these tags: <new_sentence></new_sentence>"
+    user_prompt = "You are an effiecient sentence rewriter that understand context and social values. "+ \
+                "The priority of your work is to align the sentence with the social values and context while keeping the sentence efficient for a prompt. " + \
+                "In your work, you look at a context, which is a text with many sentences, look at the social values, which is a set of keywords, and rewrite the sentence. " + \
+                "You do not interpret the sentences, you only analyze them and rewrite them.\n\n" + \
+                "Context:\n" + \
+                recommendation["prompt"] + "\n\n" + \
+                "Social values: \n" + \
+                recommendation["value"] + "\n\n. " + \
+                "Sentence: \n" + \
+                recommendation["sentence"] + "\n\n" + \
+                "New sentence:"
+    response = generate(model, tokenizer, system_prompt, user_prompt)
+
+    return {
+        'sentence': recommendation["sentence"],
+        'prompt': user_prompt,
+        'response': response,
+        'suggestion': clean_response(response)
+    }
+
