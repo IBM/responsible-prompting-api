@@ -37,10 +37,7 @@ import os
 #os.environ['TRANSFORMERS_CACHE'] ="./models/allmini/cache"
 import os.path
 from sentence_transformers import SentenceTransformer
-from umap import UMAP
-import tensorflow as tf
-from umap.parametric_umap import ParametricUMAP, load_ParametricUMAP
-from sentence_transformers import SentenceTransformer
+import pickle
 
 def populate_json(json_file_path = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json',
                     existing_json_populated_file_path = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json'):
@@ -210,19 +207,17 @@ def recommend_prompt(prompt, prompt_json, api_url, headers, add_lower_threshold 
     """
     if(model_id == 'baai/bge-large-en-v1.5' ):
         json_file = './prompt-sentences-main/prompt_sentences-bge-large-en-v1.5.json'
-        umap_folder = './models/umap/BAAI/bge-large-en-v1.5/'
+        umap_model_file = './models/umap/intfloat/multilingual-e5-large/umap.pkl'
     elif(model_id == 'intfloat/multilingual-e5-large'):
         json_file = './prompt-sentences-main/prompt_sentences-multilingual-e5-large.json'
-        umap_folder = './models/umap/intfloat/multilingual-e5-large/'
+        umap_model_file = './models/umap/intfloat/multilingual-e5-large/umap.pkl'
     else: # fall back to all-minilm as default
         json_file = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json'
-        umap_folder = './models/umap/sentence-transformers/all-MiniLM-L6-v2/'
+        umap_model_file = './models/umap/sentence-transformers/all-MiniLM-L6-v2/umap.pkl'
 
-    # Loading the encoder and config separately due to a bug
-    encoder = tf.keras.models.load_model( umap_folder )
-    with open( f"{umap_folder}umap_config.json", "r" ) as f:
-        config = json.load( f )
-    umap_model = ParametricUMAP( encoder=encoder, **config )
+    with open(umap_model_file, 'rb') as f:
+        umap_model = pickle.load(f)
+
     prompt_json = json.load( open( json_file ) )
 
     # Output initialization
@@ -262,9 +257,9 @@ def recommend_prompt(prompt, prompt_json, api_url, headers, add_lower_threshold 
     # Recommendation of values to remove from the current prompt
     for sentence in input_sentences:
         input_embedding = query(sentence, api_url, headers) # remote
-        # Obtaining XY coords for input sentences from a parametric UMAP model
+        # Obtaining XY coords for input sentences from a UMAP model
         if(len(prompt_json['negative_values'][0]['centroid']) == len(input_embedding) and sentence != ''):
-            embeddings_umap = umap_model.transform(tf.expand_dims(pd.DataFrame(input_embedding), axis=0))
+            embeddings_umap = umap_model.transform(np.expand_dims(pd.DataFrame(input_embedding).squeeze(), axis=0))
             input_items.append({
                 'sentence': sentence,
                 'x': str(embeddings_umap[0][0]),
@@ -376,19 +371,17 @@ def recommend_local(prompt, prompt_json, model_id, model_path = './models/all-Mi
     """
     if(model_id == 'baai/bge-large-en-v1.5' ):
         json_file = './prompt-sentences-main/prompt_sentences-bge-large-en-v1.5.json'
-        umap_folder = './models/umap/BAAI/bge-large-en-v1.5/'
+        umap_model_file = './models/umap/intfloat/multilingual-e5-large/umap.pkl'
     elif(model_id == 'intfloat/multilingual-e5-large'):
         json_file = './prompt-sentences-main/prompt_sentences-multilingual-e5-large.json'
-        umap_folder = './models/umap/intfloat/multilingual-e5-large/'
+        umap_model_file = './models/umap/intfloat/multilingual-e5-large/umap.pkl'
     else: # fall back to all-minilm as default
         json_file = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json'
-        umap_folder = './models/umap/sentence-transformers/all-MiniLM-L6-v2/'
+        umap_model_file = './models/umap/sentence-transformers/all-MiniLM-L6-v2/umap.pkl'
 
-    # Loading the encoder and config separately due to a bug
-    encoder = tf.keras.models.load_model( umap_folder )
-    with open( f"{umap_folder}umap_config.json", "r" ) as f:
-        config = json.load( f )
-    umap_model = ParametricUMAP( encoder=encoder, **config )
+    with open(umap_model_file, 'rb') as f:
+        umap_model = pickle.load(f)
+
     prompt_json = json.load( open( json_file ) )
 
     # Output initialization
@@ -428,9 +421,9 @@ def recommend_local(prompt, prompt_json, model_id, model_path = './models/all-Mi
     # Recommendation of values to remove from the current prompt
     for sentence in input_sentences:
         input_embedding = model.encode(sentence) # local
-        # Obtaining XY coords for input sentences from a parametric UMAP model
+        # Obtaining XY coords for input sentences from a UMAP model
         if(len(prompt_json['negative_values'][0]['centroid']) == len(input_embedding) and sentence != ''):
-            embeddings_umap = umap_model.transform(tf.expand_dims(pd.DataFrame(input_embedding), axis=0))
+            embeddings_umap = umap_model.transform(np.expand_dims(pd.DataFrame(input_embedding).squeeze(), axis=0))
             input_items.append({
                 'sentence': sentence,
                 'x': str(embeddings_umap[0][0]),
