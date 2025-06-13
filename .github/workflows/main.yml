@@ -1,5 +1,8 @@
 name: Deploy App to Code Engine
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:
