@@ -37,6 +37,7 @@ import logging
 import uuid
 import json
 import os
+import pickle
 
 app = Flask(__name__)
 
@@ -66,16 +67,31 @@ def index():
 @app.route("/recommend", methods=['GET'])
 @cross_origin()
 def recommend():
-    user_ip = request.remote_addr
-    hf_token, hf_url = get_credentials.get_credentials()
-    api_url, headers = authenticate_api.authenticate_api(hf_token, hf_url)
+    model_id, _ =save_model.save_model()
     prompt_json = recommendation_handler.populate_json()
     args = request.args
+    print("args list = ", args)
     prompt = args.get("prompt")
-    recommendation_json = recommendation_handler.recommend_prompt(prompt, prompt_json,
-                                                                  api_url, headers)
+
+    umap_model_file = './models/umap/sentence-transformers/all-MiniLM-L6-v2/umap.pkl'
+    with open(umap_model_file, 'rb') as f:
+        umap_model = pickle.load(f)
+
+    # Embeddings from HF API
+    # hf_token, hf_url = get_credentials.get_credentials()
+    # api_url, headers = authenticate_api.authenticate_api(hf_token, hf_url)
+    # api_url = f'https://router.huggingface.co/hf-inference/models/{model_id}/pipeline/feature-extraction'
+    # embedding_fn = recommendation_handler.get_embedding_func(inference='huggingface', model_id=model_id, api_url= api_url, headers = headers)
+
+    # Embeddings from local inference
+    embedding_fn = recommendation_handler.get_embedding_func(inference='local', model_id=model_id)
+
+    recommendation_json = recommendation_handler.recommend_prompt(prompt, prompt_json, embedding_fn, umap_model=umap_model)
+
+    user_ip = request.remote_addr
     logger.info(f'USER - {user_ip} - ID {id} - accessed recommend route')
     logger.info(f'RECOMMEND ROUTE - request: {prompt} response: {recommendation_json}')
+
     return recommendation_json
 
 @app.route("/get_thresholds", methods=['GET'])
@@ -84,24 +100,27 @@ def get_thresholds():
     hf_token, hf_url = get_credentials.get_credentials()
     api_url, headers = authenticate_api.authenticate_api(hf_token, hf_url)
     prompt_json = recommendation_handler.populate_json()
-    model_id = 'sentence-transformers/all-minilm-l6-v2'
     args = request.args
-    #print("args list = ", args)
     prompt = args.get("prompt")
-    thresholds_json = recommendation_handler.get_thresholds(prompt, prompt_json, api_url,
-                                                            headers, model_id)
+    thresholds_json = recommendation_handler.get_thresholds(prompt, prompt_json, api_url, headers)
     return thresholds_json
 
 @app.route("/recommend_local", methods=['GET'])
 @cross_origin()
 def recommend_local():
-    model_id, model_path = save_model.save_model()
-    prompt_json = recommendation_handler.populate_json()
+    model_id, _ = save_model.save_model()
+    prompt_json, _ = recommendation_handler.populate_json()
     args = request.args
     print("args list = ", args)
     prompt = args.get("prompt")
-    local_recommendation_json = recommendation_handler.recommend_local(prompt, prompt_json,
-                                                                       model_id, model_path)
+    
+    umap_model_file = './models/umap/sentence-transformers/all-MiniLM-L6-v2/umap.pkl'
+    with open(umap_model_file, 'rb') as f:
+        umap_model = pickle.load(f)
+
+    embedding_fn = recommendation_handler.get_embedding_func(inference='local', model_id=model_id)
+
+    local_recommendation_json = recommendation_handler.recommend_prompt(prompt, prompt_json, embedding_fn, umap_model=umap_model)
     return local_recommendation_json
 
 @app.route("/log", methods=['POST'])
