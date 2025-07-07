@@ -129,7 +129,7 @@ def populate_centroids(prompt_json):
         v['centroid'] = get_centroid(v, dimension = 384, k = 10)
     return prompt_json
 
-    # Saving the embeddings for a specific LLM
+# Saving the embeddings for a specific LLM
 def save_json(prompt_json, json_out_file_name):
     with open(json_out_file_name, 'w') as outfile:
         json.dump(prompt_json, outfile)
