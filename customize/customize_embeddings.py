@@ -43,7 +43,27 @@ json_in_file_name = json_in_file.split(".json")[0]
 # OUTPUT FILE
 json_out_file_name = f'{json_in_file_name}-{model_id}.json'
 
+# check if the output file already exists
+if os.path.exists(json_out_file_name):
+    try:
+        # Load existing data from the output file
+        existing_data = customize_helper.load_json(json_out_file_name)
+    except Exception as e:
+        existing_data = None
+
+# hashmap 
+prompts_embeddings = {}
+if existing_data:
+    for d in existing_data["positive_values"]:
+        for p in d["prompts"]:
+            prompts_embeddings[p["text"]] = p["embedding"]
+    for d in existing_data["negative_values"]:
+        for p in d["prompts"]:
+            prompts_embeddings[p["text"]] = p["embedding"]
+
+
+
 prompt_json = json.load(open(json_in_file))
-prompt_json_embeddings = customize_helper.populate_embeddings(prompt_json, model_path)
+prompt_json_embeddings = customize_helper.populate_embeddings(prompt_json, model_path, prompts_embeddings)
 prompt_json_centroids = customize_helper.populate_centroids(prompt_json_embeddings)
 customize_helper.save_json(prompt_json_centroids, json_out_file_name)
