@@ -91,10 +91,13 @@ def get_centroid(v, dimension = 384, k = 10):
             i += 1
     return centroid
 
-def populate_embeddings(prompt_json, model_path):
-    errors, successess = 0, 0
+def populate_embeddings(prompt_json, model_path, prompts_embeddings):
+    errors, successes = 0, 0
     for v in prompt_json['positive_values']:
         for p in v['prompts']:
+            if (p['text'] in prompts_embeddings):
+                p['embedding'] = prompts_embeddings[p['text']]
+            else:            
                 if( p['text'] != '' and p['embedding'] == []): # only considering missing embeddings
                     embedding = query_model(p['text'], model_path)
                     if( 'error' in embedding ):
@@ -106,14 +109,17 @@ def populate_embeddings(prompt_json, model_path):
 
     for v in prompt_json['negative_values']:
         for p in v['prompts']:
-            if(p['text'] != '' and p['embedding'] == []):
-                embedding = query_model(p['text'], model_path)
-                if('error' in embedding):
-                    p['embedding'] = []
-                    errors += 1
-                else:
-                    p['embedding'] = embedding.tolist()
-                    #successes += 1
+            if (p['text'] in prompts_embeddings):
+                p['embedding'] = prompts_embeddings[p['text']]
+            else:
+                if(p['text'] != '' and p['embedding'] == []):
+                    embedding = query_model(p['text'], model_path)
+                    if('error' in embedding):
+                        p['embedding'] = []
+                        errors += 1
+                    else:
+                        p['embedding'] = embedding.tolist()
+                        #successes += 1
     return prompt_json
 
 def populate_centroids(prompt_json):
@@ -123,7 +129,15 @@ def populate_centroids(prompt_json):
         v['centroid'] = get_centroid(v, dimension = 384, k = 10)
     return prompt_json
 
-    # Saving the embeddings for a specific LLM
+# Saving the embeddings for a specific LLM
 def save_json(prompt_json, json_out_file_name):
     with open(json_out_file_name, 'w') as outfile:
         json.dump(prompt_json, outfile)
+
+# load existing data from a JSON file
+def load_json(json_out_file):
+    if os.path.exists(json_out_file):
+        with open(json_out_file, 'r') as infile:
+            return json.load(infile)
+    else:
+        return None
