@@ -1,6 +1,6 @@
 # CODEOWNERS
 
-Vagner Santana - vsantana@ibm.com
+Vagner Santana - vsantana@nic.br
 
 Cássia Sampaio - csamp@ibm.com
 
