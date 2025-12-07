@@ -43,13 +43,14 @@ json_in_file_name = json_in_file.split(".json")[0]
 # OUTPUT FILE
 json_out_file_name = f'{json_in_file_name}-{model_id}.json'
 
+existing_data = None
 # check if the output file already exists
 if os.path.exists(json_out_file_name):
     try:
         # Load existing data from the output file
         existing_data = customize_helper.load_json(json_out_file_name)
     except Exception as e:
-        existing_data = None
+        print(f"No existing data found in {json_out_file_name}")
 
 # hashmap 
 prompts_embeddings = {}

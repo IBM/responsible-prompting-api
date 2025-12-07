@@ -27,10 +27,11 @@ __version__ = "0.0.1"
 
 import os
 import json
-import pandas as pd
 import numpy as np
 import math
 from sentence_transformers import SentenceTransformer
+
+from utils import get_distance
 
 # Requests embeddings for a given sentence
 def query_model(texts, model_path):
@@ -43,53 +44,21 @@ def query_model(texts, model_path):
     else:
         return out
 
-# Returns euclidean distance between two embeddings
-def get_distance(embedding1, embedding2):
-    total = 0
-    if( len(embedding1) != len(embedding2)):
-        return math.inf
-
-    for i, obj in enumerate(embedding1):
-        total += math.pow(embedding2[0][i] - embedding1[0][i], 2)
-    return(math.sqrt(total))
-
 # Returns the centroid for a given value
 def get_centroid(v, dimension = 384, k = 10):
-    centroid = [0] * dimension
-    count = 0
-    for p in v['prompts']:
-        i = 0
-        while i < len(p['embedding']):
-            centroid[i] += p['embedding'][i]
-            i += 1
-        count += 1
-    i = 0
-    while i < len(centroid):
-        centroid[i] /= count
-        i += 1
+    if len(v['prompts']) == 0:
+        raise ValueError("List of prompts must not be empty")
 
-    # Update centroid considering only the k-near elements
-    if(len(v['prompts']) <= k):
-        return centroid
+    embeddings = np.array([p['embedding'] for p in v['prompts']])
+    value_centroid = embeddings.mean(axis=0)
+
+    if len(v['prompts']) > k:
+        distances = np.array([get_distance(value_centroid, emb) for emb in embeddings])
+        k_nearest_indices = np.argsort(distances)[:k]
+        centroid = np.mean(embeddings[k_nearest_indices], axis=0)
+        return centroid.tolist()
     else:
-        k_items = pd.DataFrame(columns=['embedding', 'distance'])
-        for p in v['prompts']:
-            dist = get_distance(pd.DataFrame(centroid), pd.DataFrame(p['embedding']))
-            k_items = pd.concat([pd.DataFrame([[p['embedding'], dist]], columns=k_items.columns), k_items], ignore_index=True)
-
-        k_items = k_items.sort_values(by='distance')
-        k_items = k_items.head(k)
-
-        # Computing centroid only for the k-near elements
-        centroid = [0] * dimension
-        for i, embedding in enumerate(k_items['embedding']):
-            for j, dimension in enumerate(embedding):
-                centroid[j] += embedding[j]
-        i = 0
-        while i < len(centroid):
-            centroid[i] /= k
-            i += 1
-    return centroid
+        return value_centroid.tolist()
 
 def populate_embeddings(prompt_json, model_path, prompts_embeddings):
     errors, successes = 0, 0
