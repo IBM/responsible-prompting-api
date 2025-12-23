@@ -35,6 +35,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 import os
 from sentence_transformers import SentenceTransformer
 
+from utils import get_distance
+
 def populate_json(json_file_path = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json',
                     existing_json_populated_file_path = './prompt-sentences-main/prompt_sentences-all-minilm-l6-v2.json'):
     """
@@ -102,41 +104,9 @@ def split_into_sentences(prompt):
     sentences = re.split(r'(?<=[.!?]) +', prompt)
     return sentences
 
-def get_distance(embedding1, embedding2):
-    """
-    Function that returns euclidean distance between
-    two embeddings.
-
-    Args:
-        embedding1: first embedding.
-        embedding2: second embedding.
-
-    Returns:
-        The euclidean distance value.
-
-    Raises:
-        Nothing.
-    """
-    total = 0
-    if(len(embedding1) != len(embedding2)):
-        return math.inf
-    for i, obj in enumerate(embedding1):
-        total += math.pow(embedding2[0][i] - embedding1[0][i], 2)
-    return(math.sqrt(total))
-
-def sort_by_similarity(e):
-    """
-    Function that sorts by similarity.
-
-    Args:
-        e:
-
-    Returns:
-        The sorted similarity value.
-
-    Raises:
-        Nothing.
-    """
+def get_similarity(e): 
+    if 'similarity' not in e: 
+        raise ValueError(f"Key 'similarity' not found in {e}. Expected a dictionary with a 'similarity' key.")
     return e['similarity']
 
 def recommend_prompt(
@@ -271,7 +241,7 @@ def recommend_prompt(
 
     out['input'] = input_items
 
-    out['add'] = sorted(out['add'], key=sort_by_similarity, reverse=True)
+    out['add'] = sorted(out['add'], key=get_similarity, reverse=True)
     values_map = {}
     for item in out['add'][:]:
         if(item['value'] in values_map):
@@ -280,7 +250,7 @@ def recommend_prompt(
             values_map[item['value']] = item['similarity']
     out['add'] = out['add'][0:5]
 
-    out['remove'] = sorted(out['remove'], key=sort_by_similarity, reverse=True)
+    out['remove'] = sorted(out['remove'], key=get_similarity, reverse=True)
     values_map = {}
     for item in out['remove'][:]:
         if(item['value'] in values_map):
@@ -318,7 +288,7 @@ def get_thresholds(
     remove_similarities = []
 
     for p_id, p in enumerate(prompts):
-        out = recommend_prompt(p, prompt_json, embedding_fn, 0, 1, 0, 0, None) # Wider possible range
+        out = recommend_prompt(p, prompt_json, embedding_fn, 0, 1, 0, 0, None) # Widest possible range
 
         for r in out['add']:
             add_similarities.append(r['similarity'])
