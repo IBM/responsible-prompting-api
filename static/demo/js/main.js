@@ -488,8 +488,9 @@ function generateRecommendations(sendBtnId, promptInputId, recommendationDivId) 
                     // Removal recommendations
                     $tag.hover(
                         () => {
-                            const cur = $(promptInputId).html();
-                            $(promptInputId).data("prevHtml", cur);
+                            // Snapshot the current content as cloned DOM nodes so it can be
+                            // restored on hover-out without round-tripping through an HTML string.
+                            $(promptInputId).data("prevNodes", $(promptInputId).contents().clone(true));
                             $(promptInputId).html(
                                 $(promptInputId).html().replace(
                                     rec.sentence.trim(),
@@ -498,8 +499,12 @@ function generateRecommendations(sendBtnId, promptInputId, recommendationDivId) 
                             )
                         },
                         () => {
-                            const prev = $(promptInputId).data("prevHtml") || txt;
-                            $(promptInputId).html(prev);
+                            const prevNodes = $(promptInputId).data("prevNodes");
+                            if (prevNodes && prevNodes.length) {
+                                $(promptInputId).empty().append(prevNodes.clone(true));
+                            } else {
+                                $(promptInputId).text(txt);
+                            }
                         }
                     );
 
@@ -536,13 +541,20 @@ function generateRecommendations(sendBtnId, promptInputId, recommendationDivId) 
                             $tag.hover(
                                 () => {
                                     const cur = $(promptInputId).html();
+                                    // prevHtml is still consumed as a string by the click handler below;
+                                    // prevNodes is the cloned-node snapshot used for a safe hover-out restore.
                                     $(promptInputId).data("prevHtml", cur);
+                                    $(promptInputId).data("prevNodes", $(promptInputId).contents().clone(true));
                                     $(promptInputId).html($(promptInputId).html() + " <span class='rec-span' style='background-color: green;'>" + rec.prompt.trim() + "</span>")
                                     $(promptInputId).scrollTop($(promptInputId)[0].scrollHeight);
                                 },
                                 () => {
-                                    const prev = $(promptInputId).data("prevHtml") || txt;
-                                    $(promptInputId).html(prev);
+                                    const prevNodes = $(promptInputId).data("prevNodes");
+                                    if (prevNodes && prevNodes.length) {
+                                        $(promptInputId).empty().append(prevNodes.clone(true));
+                                    } else {
+                                        $(promptInputId).text(txt);
+                                    }
                                 }
                             );
 
