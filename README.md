@@ -17,7 +17,7 @@ This Responsible Prompting API is composed of a `Flask server` that hosts the `r
 
 ## Getting started
 First, make sure you have:
-- A machine with python 3.9 installed
+- A machine with python 3.12 installed
 - A Hugging Face [access token](https://huggingface.co/docs/hub/en/security-tokens)
 
 > [!NOTE]  
