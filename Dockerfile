@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.12
 ENV PYTHONUNBUFFERED=1
 
 COPY control /opt/microservices/control
@@ -17,7 +17,7 @@ RUN pip install --upgrade pip \
 	&& apt-get update \
 	&& apt install -y build-essential \
 	&& apt install -y libmariadb3 libmariadb-dev \
-	&& pip install --no-cache-dir torch==2.0.0 --index-url https://download.pytorch.org/whl/cpu \
+	&& pip install --no-cache-dir torch==2.13.0 --index-url https://download.pytorch.org/whl/cpu \
 	&& pip install --no-cache-dir --upgrade -r /opt/microservices/requirements.txt
 
 USER 1001
