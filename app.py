@@ -129,7 +129,7 @@ def recommend():
     logger.info(f'USER - {user_ip} - ID {id} - accessed recommend route')
     logger.info(f'RECOMMEND ROUTE - request: {prompt} response: {recommendation_json}')
 
-    return recommendation_json
+    return jsonify(recommendation_json)
 
 @app.route("/get_thresholds", methods=['GET'])
 @cross_origin()
@@ -158,7 +158,7 @@ def recommend_local():
     embedding_fn = recommendation_handler.get_embedding_func(inference='local', model_id=model_id)
 
     local_recommendation_json = recommendation_handler.recommend_prompt(prompt, prompt_json, embedding_fn, umap_model=umap_model)
-    return local_recommendation_json
+    return jsonify(local_recommendation_json)
 
 @app.route("/log", methods=['POST'])
 @cross_origin()
