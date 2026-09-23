@@ -14,3 +14,5 @@ The following notebooks exemplify workflow steps, features, and possible uses of
 ## Evaluation
 
 1. [Test Recommendations with a Prompt Dataset](./test_recommendations.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/IBM/responsible-prompting-api/blob/develop/cookbook/test_recommendations.ipynb)
+2. [Evaluate Embedding Model](./evaluate_embedding_model.ipynb) - Intrinsic embedding quality metrics (inter-cluster distance, misclassification rate, intra-cluster K-means distance).
+3. [Embedding Model Comparison: Red Team Evaluation](./embeddings_comparison_red_team.ipynb) - Extrinsic task-level evaluation comparing how different embedding models affect recommendation quality using the red team dataset. Computes accuracy, precision, recall, and F1-score for add and remove recommendations.
