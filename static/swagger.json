@@ -99,22 +99,31 @@
           {
             "name": "prompts",
             "in": "query",
-            "description": "Prompt array.",
+            "description": "One or more prompt samples used to estimate recommendation thresholds. Repeat this query parameter to provide multiple prompts.",
             "required": true,
             "schema": {
-              "type": "string",
-              "maxLength": 1024
-            }
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 1024
+              }
+            },
+            "style": "form",
+            "explode": true,
+            "example": [
+              "Act as a data scientist. Help me make this project more inclusive.",
+              "What evidence should I gather to support my request for more resources?"
+            ]
           },
           {
             "name": "model_id",
             "in": "header",
-            "description": "The model id to be used. The default choice is: sentence-transformers/all-minilm-l6-v2",
+            "description": "The local model path or Hugging Face model id to be used. If omitted, the default local model path is ./models/all-MiniLM-L6-v2/.",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "example": "sentence-transformers/all-minilm-l6-v2"
+            "example": "./models/all-MiniLM-L6-v2/"
           }
         ],
         "responses": {

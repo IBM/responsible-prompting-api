@@ -134,13 +134,20 @@ def recommend():
 @app.route("/get_thresholds", methods=['GET'])
 @cross_origin()
 def get_thresholds():
-    hf_token, hf_url = get_credentials.get_hf_credentials()
-    api_url, headers = authenticate_api.authenticate_api(hf_token, hf_url)
     prompt_json = recommendation_handler.populate_json()
-    args = request.args
-    prompt = args.get("prompt")
-    thresholds_json = recommendation_handler.get_thresholds(prompt, prompt_json, api_url, headers)
-    return thresholds_json
+    prompts = [
+        prompt.strip()
+        for prompt in request.args.getlist("prompts")
+        if prompt.strip()
+    ]
+    if not prompts:
+        return jsonify({"error": "Missing required query parameter: prompts"}), 400
+
+    model_id = request.headers.get("model_id") or "./models/all-MiniLM-L6-v2/"
+    embedding_fn = recommendation_handler.get_embedding_func(inference='local', model_id=model_id)
+
+    thresholds_json = recommendation_handler.get_thresholds(prompts, prompt_json, embedding_fn)
+    return jsonify({key: float(value) for key, value in thresholds_json.items()})
 
 @app.route("/recommend_local", methods=['GET'])
 @cross_origin()
