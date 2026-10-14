@@ -79,6 +79,6 @@ typing_extensions==4.12.2
 tzdata==2024.1
 umap-learn==0.5.7
 urllib3==2.8.0
-Werkzeug==3.1.6
+Werkzeug==3.1.9
 wrapt==1.16.0
 zipp==3.19.2
