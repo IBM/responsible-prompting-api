@@ -1,0 +1,50 @@
+name: Update Embeddings
+
+on:
+  pull_request:
+    paths:
+      - prompt-sentences-main/prompt_sentences.json
+  workflow_dispatch: # To allow manual trigger of this workflow
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  regenerate:
+    if: github.actor != 'ci-bot'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+
+      - run: pip install -r requirements.txt
+
+      # Github actions can run for 6 hours maximum
+      # For small updates to the prompts file, this should be plenty
+      - name: Run generator
+        run: python customize/customize_embeddings.py
+
+      - name: Commit if changed
+        run: |
+          git status
+          if git diff --quiet; then
+            echo "No changes"
+          else
+            git config user.name "ci-bot"
+            git config user.email "ci-bot@users.noreply.github.com"
+            git add -u
+            git commit -m "chore: update embeddings" -s
+            git push
+          fi
