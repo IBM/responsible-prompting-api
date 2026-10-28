@@ -39,7 +39,7 @@ MarkupSafe==2.1.5
 marshmallow==3.26.2
 matplotlib==3.9.1
 mdurl==0.1.2
-nltk==3.10.3
+nltk==3.10.4
 numpy<2.0
 packaging==24.1
 pandas==2.2.2
